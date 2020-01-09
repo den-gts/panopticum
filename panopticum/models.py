@@ -1,6 +1,57 @@
 from django.db import models
 from datatableview.views import DatatableView
 from datatableview import helpers
+from ldapdb.models.fields import CharField, IntegerField, ListField
+import ldapdb.models
+
+
+class LdapUserManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(members='CN=Team-DevOps,OU=RND Distribution groups,OU=Distribution Groups,OU=Accounts and Groups,DC=corp,DC=acronis,DC=com')
+
+
+class LdapGroup(ldapdb.models.Model):
+    base_dn = "dc=corp,dc=acronis,dc=com"
+    object_classes = ['GROUP']
+
+    cn = CharField(db_column='cn', max_length=200, primary_key=True)
+
+
+class LdapUser(ldapdb.models.Model):
+    """
+    Class for representing an LDAP group entry.
+    """
+    # LDAP meta-data
+    base_dn = "ou=Internal Users,ou=Accounts and Groups,dc=corp,dc=acronis,dc=com"
+    object_classes = ['User']
+
+    cn = CharField(db_column='cn', max_length=200, primary_key=True)
+    company = CharField(db_column='company', max_length=100)
+    department = CharField(db_column='department', max_length=200)
+    name = CharField(db_column='displayName', max_length=200)
+    surname = CharField(db_column='sn', max_length=100, )
+    country = CharField(db_column='co', max_length=100)
+    city = CharField(db_column='i', max_length=150)
+    title = CharField(db_column='title', max_length=150)
+    office = CharField(db_column='physicalDeliveryOfficeName')
+    telephone_number = CharField(db_column='mobile')
+    first_name = CharField(db_column='givenName')
+    manager_dn = CharField(db_column='manager')
+    #manager = models.ForeignKey('LdapUser', to_field='dn', db_column='manager', on_delete=models.PROTECT)
+    members = ListField(db_column='memberOf')
+    mail = CharField(db_column='mail', max_length=200)
+
+    #objects = LdapUserManager()
+
+    def __str__(self):
+        return self.name
+
+    def __unicode__(self):
+        return self.name
+
+    @property
+    def manager(self):
+        return self.objects.get(dn=self.manager_dn)
 
 
 class DatacenterModel(models.Model):

@@ -1,10 +1,25 @@
 from django.contrib import admin
 from django.forms.widgets import SelectMultiple, NumberInput, TextInput, Select
+from django.contrib import admin
+from . import models
 
 import datetime
 
 # Register your models here.
 from panopticum.models import *
+
+
+class LDAPUserAdmin(admin.ModelAdmin):
+    #exclude = ['dn', 'objectClass']
+    list_display = ['name']
+
+class LDAPGroupAdmin(admin.ModelAdmin):
+    #exclude = ['dn', 'objectClass']
+    list_display = ['cn']
+
+
+admin.site.register(LdapUser, LDAPUserAdmin)
+admin.site.register(LdapGroup, LDAPGroupAdmin)
 
 
 class ComponentVersionAdmin(admin.ModelAdmin):

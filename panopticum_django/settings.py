@@ -92,12 +92,23 @@ WSGI_APPLICATION = 'panopticum_django.wsgi.application'
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
 DATABASES = {
+    'ldap': {
+        'ENGINE': 'ldapdb.backends.ldap',
+        'NAME': 'ldap://ldap.corp.acronis.com:3268/',
+        'USER': 'SA_DO_git@acronis.com',
+        'PASSWORD': '{$r%P6R<',
+    },
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'panopticum',
+        'USER': 'postgres',
+        'PASSWORD': 'some',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
     }
 }
 
+DATABASE_ROUTERS = ['ldapdb.router.Router']
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
