@@ -202,19 +202,6 @@ function update_component_page_elements(component) {
         }
     });
 
-    $(".pa-status").each(function(index, el) {
-        var val = $(el).html();
-        if (val == "unknown") {
-            $(el).html("<i class='unknown fa fa-question-circle'></i>");
-        } else if (val == "no") {
-            $(el).html("<span class='no'>NO</span>");
-        } else if (val == "partial") {
-            $(el).html("<span class='some'>Some</span>");
-        } else if (val == "yes") {
-            $(el).html("<span class='yes'>YES</span>");
-        }
-    });
-
     $(".pa-component-stars").each(function(index, el) {
         var val = parseInt($(el).html());
         console.log($(el), val);
@@ -252,6 +239,27 @@ function vue_component_init() {
     console.log("vue_component_init()");
 
     var url = '/api' + window.location.pathname + '/?format=json'
+
+    Vue.component('widget-signoff', {
+      props: ['status'],
+      computed: {
+          classObject: function() {
+            console.log(this.status);
+            return {
+              yes: this.status == 'yes',
+              no: this.status == 'no',
+              unknown: this.status == 'unknown' || this.status === null
+            }
+          }
+      },
+      template: `
+        <span v-bind:class="classObject" v-if="['yes', 'no'].includes(status)">
+          {% templatetag openvariable %} status.toUpperCase() {% templatetag closevariable %}
+        </span>
+        <i v-else class="unknown fa fa-question-circle" style="font-size: 12px; color: crimson;" />
+        </span>
+      `
+    })
 
     const app = new Vue({
         el: "#vue-component",
