@@ -27,6 +27,7 @@ class ProductVersionViewSet(RelativeURLViewSet):
     queryset = ProductVersionModel.objects.all().order_by('order')
     serializer_class = ProductVersionSerializer
 
+
 class HistoryComponentVersionViewSet(RelativeURLViewSet):
     queryset = ComponentVersionModel.history.all()
     serializer_class = HistoricalComponentVersionSerializer
@@ -57,6 +58,10 @@ class ComponentVersionViewSet(RelativeURLViewSet):
     queryset = ComponentVersionModel.objects.all()
     serializer_class = ComponentVersionSerializer
     filterset_fileds = "__all__"
+
+    def get_queryset(self):
+        req_set = self.request.query_params.get('requirement_set')
+        return ComponentVersionModel.objects.with_rating(req_set)
 
 
 class ComponentRuntimeTypeViewSet(RelativeURLViewSet):
