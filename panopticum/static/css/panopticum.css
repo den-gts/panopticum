@@ -490,11 +490,11 @@ div.signee-yes {
 }
 
 .owner-no {
-    background-color: red;
+    background-color: #F5B7B1 !important;
 }
 
 .owner-yes {
-    background-color: DarkSeaGreen;
+    background-color: #D4EFDF !important;
 }
 
 .inner-cell {
