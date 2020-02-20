@@ -466,17 +466,17 @@ span.pa-component-stars i {
 }
 
 
-div.signee {
+div.owner {
     position: absolute;
-    right:0;
+    left: 0;
     top: 0;
 }
 
-div.signee-no {
+.owner-no {
     color: red;
 }
 
-div.signee-yes {
+.owner-yes {
     color: DarkSeaGreen;
 }
 
@@ -489,11 +489,11 @@ div.signee-yes {
     top: 0px;
 }
 
-.owner-no {
+.signee-no {
     background-color: #F5B7B1 !important;
 }
 
-.owner-yes {
+.signee-yes {
     background-color: #D4EFDF !important;
 }
 
