@@ -90,6 +90,9 @@ class ComponentVersionFilter(filters.FilterSet):
                                      queryset=models.RequirementStatusEntry.objects.all())
     exclude_statuses = filters.BaseInFilter(field_name='statuses',
                                             method='filter_exclude_statuses')
+    unknown_status_count = filters.NumberFilter()
+    negative_status_count = filters.NumberFilter()
+    total_statuses = filters.NumberFilter()
 
     class Meta:
         model = models.ComponentVersionModel
