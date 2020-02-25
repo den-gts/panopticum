@@ -11,11 +11,13 @@ from rest_framework.views import APIView
 import rest_framework.authtoken.models
 import django.contrib.auth
 import django.contrib.auth.models
+import rest_framework.filters
 
 import panopticum.filters
 from .models import *
 from .serializers import *
 from .jira import JiraProxy
+
 
 class RelativeURLViewSet(viewsets.ModelViewSet):
     def get_serializer_context(self):
@@ -23,9 +25,11 @@ class RelativeURLViewSet(viewsets.ModelViewSet):
         context.update({'request': None})
         return context
 
+
 class ProductVersionViewSet(RelativeURLViewSet):
     queryset = ProductVersionModel.objects.all().order_by('order')
     serializer_class = ProductVersionSerializer
+
 
 class HistoryComponentVersionViewSet(RelativeURLViewSet):
     queryset = ComponentVersionModel.history.all()
@@ -41,7 +45,7 @@ class ComponentViewSet(RelativeURLViewSet):
     def latest_version(self, request, pk=None):
         component_obj = self.get_object()
         component_version = ComponentVersionModel.objects.filter(component=component_obj.id).order_by(
-            '-meta_update_date').first()
+            '-update_date').first()
         if not component_version:
             return Response({'error': f"Last version for {component_obj.name}({component_obj.pk}) not found"},
                             status=rest_framework.status.HTTP_404_NOT_FOUND)

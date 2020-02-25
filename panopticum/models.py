@@ -472,10 +472,9 @@ class ComponentVersionModel(models.Model):
     qa_upgrade_tests_signoff = panopticum.fields.SigneeField(related_name='signed_upgrade_tests')
 
     # meta
-
-    meta_update_by = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True, related_name='updater_of')
-    meta_update_date = models.DateTimeField(db_index=True)
-    meta_deleted = models.BooleanField(default=False)
+    release_date = models.DateField(null=True, blank=True)
+    update_date = models.DateTimeField(db_index=True, auto_now=True)
+    deleted = models.BooleanField(default=False)
 
     meta_compliance_rating = models.IntegerField(default=0)
     meta_mt_rating = models.IntegerField(default=0)
