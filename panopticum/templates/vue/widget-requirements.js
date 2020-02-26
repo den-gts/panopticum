@@ -47,7 +47,7 @@ Vue.component('widget-requirements', {
                         status: ownerStatus, 
                         notes: ownerStatus.notes,
                         signoffStatus: signeeStatus,
-                        signoffNotes: signeeStatus.notes
+                        signoffNotes: signeeStatus && signeeStatus.notes
                     })
                 }
             }
