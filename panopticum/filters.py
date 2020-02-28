@@ -9,8 +9,21 @@ class RequirementFilter(filters.FilterSet):
         model = models.Requirement
         fields = '__all__'
 
+class UserFilter(filters.FilterSet):
+    username = filters.AutoFilter(lookups='__all__')
+    class Meta:
+        model = models.User
+        exclude = ('photo', )
+
+class CategoryFilter(filters.FilterSet):
+    class Meta:
+        model = models.ComponentCategoryModel
+        fields = '__all__'
+
 class ComponentFilter(filters.FilterSet):
     name = filters.AutoFilter(lookups='__all__')
+    category = filters.RelatedFilter(CategoryFilter,
+                                     queryset=models.ComponentCategoryModel.objects.all())
 
     class Meta:
         model = models.ComponentModel
@@ -27,6 +40,10 @@ class DeploymentEnvironmentFilter(filters.FilterSet):
         model = models.DeploymentEnvironmentModel
         fields = '__all__'
 
+class ProductVersionFilter(filters.FilterSet):
+    class Meta:
+        model = models.ProductVersionModel
+        fields = '__all__'
 
 class RequirementStatusTypeFilter(filters.FilterSet):
 
@@ -72,7 +89,11 @@ class DeploymentFilter(filters.FilterSet):
     component_version = filters.RelatedFilter('ComponentVersionFilter',
                                          field_name='component_version',
                                           lookups='__all__',
-                                         queryset=models.ComponentVersionModel.objects.all())
+                                         queryset=models.ComponentVersionModel.objects.all()),
+    product_version = filters.RelatedFilter(ProductVersionFilter,
+                                            lookups='__all__',
+                                            queryset=models.ProductVersionModel.objects.all())
+
     class Meta:
         model = models.ComponentDeploymentModel
         fields = '__all__'
@@ -82,6 +103,10 @@ class ComponentVersionFilter(filters.FilterSet):
                                       field_name='component',
                                       queryset=models.ComponentModel.objects.all(),
                                       lookups='__all__')
+    owner_maintainer = filters.RelatedFilter(UserFilter,
+                                             lookups='__all__',
+                                             queryset=models.User.objects.all(),
+                                             )
     deployments = filters.RelatedFilter(DeploymentFilter,
                                         field_name='deployments',
                                         queryset=models.ComponentDeploymentModel.objects.all())
@@ -93,17 +118,13 @@ class ComponentVersionFilter(filters.FilterSet):
     unknown_status_count = filters.NumberFilter()
     negative_status_count = filters.NumberFilter()
     total_statuses = filters.NumberFilter()
+    version = filters.AutoFilter(lookups='__all__')
 
     class Meta:
         model = models.ComponentVersionModel
         fields = '__all__'
 
     def filter_exclude_statuses(self, qs, name, value):
-        """ handle query params for excluding component version with some requirement statuses.
-        that useful for filtering component version that have not requirement statuses by some
-        requirement. It's equal to select "unknown" status at frontend filters. We exclude all
-        statuses except unknown: Ready, not ready, n/a. That case cover situation when component
-        version have not requirement status. If requirement status is not exist it equal "unknown" status"""
         requirement = self.request.query_params.get('exclude_requirement')
         req_type = self.request.query_params.get('exclude_type')
         args = {}

@@ -477,7 +477,7 @@ div.owner {
 }
 
 .owner-yes {
-    color: DarkGreen;
+    color: DarkSeaGreen;
 }
 
 .owner-status-indicator {
@@ -509,6 +509,8 @@ div.owner {
     padding-bottom: 5px;
 }
 
-.cell {
+.el-table .cell {
     padding-left: 2px !important;
+    word-break: break-word !important;
+    white-space: normal;
 }
