@@ -37,7 +37,7 @@ Vue.component('dashboard-components', {
     this.locations = locations;
     this.runtimes = runtimes;
     this.privacies = privacies;
-    if (this.filters) {
+    if (this.filters && this.filters.length) {
       this.headerFilters = this.filters;
     } else {
       await this.fetchComponentsVersions();
