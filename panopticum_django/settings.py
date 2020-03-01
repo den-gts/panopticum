@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework_filters',
     'django_extensions',
     'corsheaders',
+    'database_files',
     'admin_reorder',
     'simple_history',
     'panopticum'
