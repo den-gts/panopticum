@@ -30,7 +30,6 @@ Vue.component('widget-signoff', {
     }
   },
   mounted: function() {
-    if (this.status) this.updateLastChange(this.status);
   },
   methods: {
     getIDfromHref(href) {
@@ -67,6 +66,7 @@ Vue.component('widget-signoff', {
               popper-class="signoff-popover"
               v-bind:disabled = "!popupEnabled"
               offset = -10
+              @show="updateLastChange(status)"
   >
     <div v-if="history && user">
       <div class="text item">Updated by <span style="font-weight: bold">{{ username }}</span></div>
