@@ -1,4 +1,5 @@
 FROM python:3.6-alpine
+LABEL maintainer=denis.epifanov@acronis.com
 WORKDIR /whl
 RUN apk --no-cache add alpine-sdk postgresql-dev graphviz-dev openldap-dev jpeg-dev zlib-dev
 RUN pip wheel gevent psycopg2-binary pygraphviz python-ldap pillow -w /whl

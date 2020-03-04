@@ -53,9 +53,9 @@ Vue.component('widget-components-list', {
     watch: {
         componentVersionSearch: function() {this.debouncedSearhRequest()},
         componentVersions: 'updateTable',
-        currentProduct: 'debouncedChangeFIlter',
-        currentLocation: 'debouncedChangeFIlter',
-        currentRuntime: 'debouncedChangeFIlter',
+        currentProduct: 'handleChangeFilter',
+        currentLocation: 'handleChangeFilter',
+        currentRuntime: 'handleChangeFilter',
         headerFilters: function() {this.$emit('update:header-filters', this.headerFilters)}
     },
 
@@ -141,8 +141,6 @@ Vue.component('widget-components-list', {
                     }
                 }).finally(_ => {
                     this.cancelSource = null;
-                    this.loading = false;
-                    console.log(queryParams)
                 })
             
         },
