@@ -25,6 +25,7 @@ Vue.component('widget-components-list', {
         }
     },
     created: async function() {
+        this.debouncedSearhRequest = _.debounce(this.fetchSearchComponents, 500)
         await this.fetchFilters();
 
         const [requirements, ] = await Promise.all([
@@ -40,7 +41,7 @@ Vue.component('widget-components-list', {
         }
 
         if (this.filters && this.filters.length) {
-            this.handleDropdownCommand({
+            await this.handleDropdownCommand({
                 requirement: {id: Number(this.filters[0].requirement)},
                 status: {id: Number(this.filters[0].status)},
                 type: this.filters[0].type
@@ -48,14 +49,13 @@ Vue.component('widget-components-list', {
         } else {
             await this.filterComponents();
         }
-        this.loading = false;
     },
     watch: {
-        componentVersionSearch: 'fetchSearchComponents',
+        componentVersionSearch: function() {this.debouncedSearhRequest()},
         componentVersions: 'updateTable',
-        currentProduct: 'handleChangeFilter',
-        currentLocation: 'handleChangeFilter',
-        currentRuntime: 'handleChangeFilter',
+        currentProduct: 'debouncedChangeFIlter',
+        currentLocation: 'debouncedChangeFIlter',
+        currentRuntime: 'debouncedChangeFIlter',
         headerFilters: function() {this.$emit('update:header-filters', this.headerFilters)}
     },
 
@@ -112,9 +112,10 @@ Vue.component('widget-components-list', {
                 this.statuses.push(...data.results);
             } while (data.next);
         },
-        fetchSearchComponents(queryString) {
+        fetchSearchComponents: function() {
             // filter component versions on changes in component input filter
-            const [componentName, version] = queryString.split(':')
+            const queryString = this.componentVersionSearch;
+            const [componentName, version] = queryString ? queryString.split(':') : [queryString, null]
             let queryParams = "";
             if (componentName) queryParams += `&component__name__icontains=${componentName}`;
             if (version) queryParams += `&version=${version}`;
@@ -140,7 +141,8 @@ Vue.component('widget-components-list', {
                     }
                 }).finally(_ => {
                     this.cancelSource = null;
-                    this.loading = false
+                    this.loading = false;
+                    console.log(queryParams)
                 })
             
         },
@@ -185,7 +187,7 @@ Vue.component('widget-components-list', {
                 }
             }
             this.headerFilters = headerFilters;
-            this.filterComponents(queryParams);
+            return this.filterComponents(queryParams);
         },
         getIDfromHref(href) {
             // parse Hyperlink releative link. For eaxmple: for /api/component_version/1/ will return 1
@@ -225,9 +227,10 @@ Vue.component('widget-components-list', {
             return overal_status;
         },
         updateTable: async function() {
+            this.loading = true
             await this.fetchStatusEntries();
             this.tableData = this.componentVersions.map(compVer => {
-
+                
                 let data = {
                     id: compVer.id, 
                     name: compVer.component.name, 
@@ -241,20 +244,21 @@ Vue.component('widget-components-list', {
                             status.requirement &&
                             this.getIDfromHref(status.requirement) == req.id && 
                             this.getIDfromHref(status.component_version) == compVer.id
-                        )
-                    }).map(status => {
-                        status.status = this.allStatusDefinitions
+                            )
+                        }).map(status => {
+                            status.status = this.allStatusDefinitions
                             .find(s => s.id == (status.status.id ? status.status.id : this.getIDfromHref(status.status)));
-                        return status;
-                    });
-                    data[req.title] = {
-                        owner: statuses.find(status => status.type == 'component owner'),
-                        signee: statuses.find(status => status.type == 'requirement reviewer')
-                    };
-                }
-                return data;
-            });
-        }
+                            return status;
+                        });
+                        data[req.title] = {
+                            owner: statuses.find(status => status.type == 'component owner'),
+                            signee: statuses.find(status => status.type == 'requirement reviewer')
+                        };
+                    }
+                    return data;
+                });
+            this.loading = false
+            }
     },
     template: `{% verbatim %}
 <el-card v-loading="loading" >
