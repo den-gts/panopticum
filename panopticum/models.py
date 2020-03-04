@@ -180,6 +180,8 @@ class ProgrammingLanguageModel(models.Model):
     name = models.CharField(max_length=64, help_text="Programming language")
 
     class Meta:
+        verbose_name = 'Programming language'
+        verbose_name_plural = 'Programming language'
         ordering = ['name']
 
     def __str__(self):
@@ -191,6 +193,8 @@ class FrameworkModel(models.Model):
     language = models.ForeignKey(ProgrammingLanguageModel, on_delete=models.PROTECT)
 
     class Meta:
+        verbose_name = 'Framework'
+        verbose_name_plural = 'Frameworks'
         ordering = ['name']
 
     def __str__(self):
@@ -202,6 +206,8 @@ class ORMModel(models.Model):
     language = models.ForeignKey(ProgrammingLanguageModel, on_delete=models.PROTECT)
 
     class Meta:
+        verbose_name = 'Object-Relational Mapping'
+        verbose_name_plural = 'Object-Relational Mappings'
         ordering = ['name']
 
     def __str__(self):
@@ -212,6 +218,8 @@ class LoggerModel(models.Model):
     name = models.CharField(max_length=64, help_text="Logger model")
 
     class Meta:
+        verbose_name = 'Logger'
+        verbose_name_plural = 'Loggers'
         ordering = ['name']
 
     def __str__(self):
@@ -285,7 +293,6 @@ class Requirement(models.Model):
     """ base model for requirement equal requirement header in widget """
     title = models.CharField(max_length=30, unique=True)  # backup, logging storage
     description = models.TextField(max_length=1024)  # that requirements about ...
-
 
     def __unicode__(self):
         return f"{self.__class__.__name__}: {self.title}"
