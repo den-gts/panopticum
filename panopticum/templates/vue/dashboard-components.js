@@ -20,7 +20,8 @@ Vue.component('dashboard-components', {
         {key: 'maintainer', query: 'owner_maintainer__username__icontains'}
       ],
       cancelSource: null,
-      loading: true
+      loading: true,
+      pageLimit: 30
     }
   },
   created: async function() {
@@ -56,7 +57,8 @@ Vue.component('dashboard-components', {
       loading = false
     },
     async fetchComponentsVersions(queryParams) {
-      let url = '/api/component_version/?format=json&ordering=component__name';
+      const fields = 'id,owner_maintainer,version,component,deployments,dev_raml,dev_repo,dev_jira_component,dev_docs'
+      let url = `/api/component_version/?format=json&ordering=component__name&limit=${this.pageLimit}&fields=${fields}`;
       this.cancelSearch();
       this.cancelSource = axios.CancelToken.source();
       let queryString = Object.keys(queryParams || {}).map(k => `${k}=${queryParams[k]}`).join('&');
