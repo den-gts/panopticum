@@ -259,9 +259,10 @@ function vue_component_init() {
         created: async function() {
           const urlParams = new URLSearchParams(window.location.search);
           let currentVersion = default_latest_version;
+
           let requests = [
               axios.get(url).then(response => response.data ),
-              axios.get(`/api/component_version/?format=json&fields=version,id&ordering=-release_date&component=${this.getIdFromHref(window.location.pathname)}`)
+              axios.get(`/api/component_version/?format=json&ordering=-release_date&component=${this.getIdFromHref(window.location.pathname)}`)
                 .then(response => response.data.results)
           ];
           // make parallel requests
