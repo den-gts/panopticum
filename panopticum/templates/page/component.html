@@ -260,18 +260,7 @@ function vue_component_init() {
           const urlParams = new URLSearchParams(window.location.search);
           let currentVersion = default_latest_version;
           let requests = [
-              axios.get(url)
-                .then(response => {
-                   // we can't assign response.data directly to this.component, because it will trigger
-                   // rerender. We doesn't have component.latest_version at this moment and it will raise error at render.
-                   // We will get it component.latest_version later. Also if next request will be finished
-                   // first we will overwrite component.latest_version.
-                   component = response.data;
-                })
-                .catch(error => {
-                   console.log(error);
-                   this.errored = true
-                }),
+              axios.get(url).then(response => response.data ),
               axios.get(`/api/component_version/?format=json&fields=version,id&ordering=-release_date&component=${this.getIdFromHref(window.location.pathname)}`)
                 .then(response => response.data.results)
           ];

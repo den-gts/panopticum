@@ -1,9 +1,13 @@
 .gitignore
+.idea
+.git
+helm
+compose
 Dockerfile
 env
 venv
 *.sqlite3
 data
 panopticum_django/settings_local.py
-static
 media
+static

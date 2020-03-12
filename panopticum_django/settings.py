@@ -45,8 +45,10 @@ INSTALLED_APPS = [
     'rest_framework_filters',
     'django_extensions',
     'corsheaders',
+    'database_files',
     'admin_reorder',
     'simple_history',
+    'loginas',
     'panopticum'
 ]
 
@@ -114,7 +116,7 @@ DATABASES = {
         'PASSWORD': os.environ.get('DB_PASSWORD', ''),
         'HOST': os.environ.get('DB_HOST', None),
         'PORT': os.environ.get('DB_PORT', None),
-        'CONN_MAX_AGE': 600,
+        'CONN_MAX_AGE': os.environ.get('DB_CONN_MAX_AGE', 0),
     }
 }
 
@@ -212,6 +214,10 @@ MEDIA_URL = '/media/'
 
 
 AUTH_USER_MODEL = 'panopticum.User'
+
+# This will only allow admins to log in as other users, as long as
+# those users are not admins themselves:
+CAN_LOGIN_AS = lambda request, target_user: request.user.is_superuser and not target_user.is_superuser
 
 curr_dir = os.path.abspath(os.path.dirname(__file__))
 if os.path.exists(os.path.join(curr_dir, "settings_local.py")):

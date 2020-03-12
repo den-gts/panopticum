@@ -1,3 +1,4 @@
+import database_files.storage
 import django.forms
 from django.db import models
 from datatableview.views import DatatableView
@@ -16,10 +17,11 @@ NEGATIVE_STATUS = 2
 UNKNOWN_STATUS = 1
 SIGNEE_STATUS_TYPE = 2
 
+
 class User(AbstractUser):
     dn = models.CharField(max_length=255, null=True)
     title = models.CharField(max_length=64, blank=True, null=True)
-    photo = models.ImageField(upload_to='avatars')
+    photo = models.ImageField(upload_to='avatars', storage=database_files.storage.DatabaseStorage())
     organization = models.ForeignKey('OrganizationModel', on_delete=models.PROTECT, blank=True,
                                      null=True)
     department = models.ForeignKey('OrgDepartmentModel', on_delete=models.PROTECT, blank=True,
@@ -37,6 +39,7 @@ class User(AbstractUser):
     @property
     def photo_url(self):
         if self.photo and hasattr(self.photo, 'url'):
+            self.photo.height
             return self.photo.url
 
 

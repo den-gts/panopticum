@@ -26,6 +26,7 @@ Vue.component('widget-components-list', {
         }
     },
     created: async function() {
+        this.debouncedSearhRequest = _.debounce(this.fetchSearchComponents, 500)
         await this.fetchFilters();
 
         const [requirements, ] = await Promise.all([
@@ -33,7 +34,7 @@ Vue.component('widget-components-list', {
             this.fetchStatuses(),
         ])
         this.requirements = requirements;
-        
+
         if (this.topfilters) {
             this.currentProduct = this.topfilters.product;
             this.currentLocation = this.topfilters.location;
@@ -41,7 +42,7 @@ Vue.component('widget-components-list', {
         }
 
         if (this.filters && this.filters.length) {
-            this.handleDropdownCommand({
+            await this.handleDropdownCommand({
                 requirement: {id: Number(this.filters[0].requirement)},
                 status: {id: Number(this.filters[0].status)},
                 type: this.filters[0].type
@@ -49,10 +50,9 @@ Vue.component('widget-components-list', {
         } else {
             await this.filterComponents();
         }
-        this.loading = false;
     },
     watch: {
-        componentVersionSearch: 'fetchSearchComponents',
+        componentVersionSearch: function() {this.debouncedSearhRequest()},
         componentVersions: 'updateTable',
         currentProduct: 'handleChangeFilter',
         currentLocation: 'handleChangeFilter',
@@ -113,9 +113,10 @@ Vue.component('widget-components-list', {
                 this.statuses.push(...data.results);
             } while (data.next);
         },
-        fetchSearchComponents(queryString) {
+        fetchSearchComponents: function() {
             // filter component versions on changes in component input filter
-            const [componentName, version] = queryString.split(':')
+            const queryString = this.componentVersionSearch;
+            const [componentName, version] = queryString ? queryString.split(':') : [queryString, null]
             let queryParams = "";
             if (componentName) queryParams += `&component__name__icontains=${componentName}`;
             if (version) queryParams += `&version=${version}`;
@@ -142,7 +143,6 @@ Vue.component('widget-components-list', {
                     }
                 }).finally(_ => {
                     this.cancelSource = null;
-                    this.loading = false
                 })
             
         },
@@ -152,6 +152,9 @@ Vue.component('widget-components-list', {
                 this.cancelSource.cancel('Start new search, stop active search');
             }
             loading = false
+        },
+        displayPopover(ownerStatus, signeeStatus) {
+            return [ownerStatus, signeeStatus].some(status => status) && (ownerStatus.status.id !=1 && signeeStatus.status !=1 );
         },
         handleDropdownCommand(command) {
             // handle change dropdown filters
@@ -184,7 +187,7 @@ Vue.component('widget-components-list', {
                 }
             }
             this.headerFilters = headerFilters;
-            this.filterComponents(queryParams);
+            return this.filterComponents(queryParams);
         },
         getIDfromHref(href) {
             // parse Hyperlink releative link. For eaxmple: for /api/component_version/1/ will return 1
@@ -207,8 +210,8 @@ Vue.component('widget-components-list', {
         handleChangeFilter(id) {
             this.headerFilters = {};
             this.$emit('update:top-filters', {
-                location: this.currentLocation, 
-                product: this.currentProduct, 
+                location: this.currentLocation,
+                product: this.currentProduct,
                 runtime: this.currentRuntime});
             this.filterComponents();
         },
@@ -224,9 +227,10 @@ Vue.component('widget-components-list', {
             return overal_status;
         },
         updateTable: async function() {
+            this.loading = true
             await this.fetchStatusEntries();
             this.tableData = this.componentVersions.map(compVer => {
-
+                
                 let data = {
                     id: compVer.id, 
                     name: compVer.component.name, 
@@ -240,29 +244,30 @@ Vue.component('widget-components-list', {
                             status.requirement &&
                             this.getIDfromHref(status.requirement) == req.id && 
                             this.getIDfromHref(status.component_version) == compVer.id
-                        )
-                    }).map(status => {
-                        status.status = this.allStatusDefinitions
+                            )
+                        }).map(status => {
+                            status.status = this.allStatusDefinitions
                             .find(s => s.id == (status.status.id ? status.status.id : this.getIDfromHref(status.status)));
-                        return status;
-                    });
-                    data[req.title] = {
-                        owner: statuses.find(status => status.type == 'component owner'),
-                        signee: statuses.find(status => status.type == 'requirement reviewer')
-                    };
-                }
-                return data;
-            });
-        }
+                            return status;
+                        });
+                        data[req.title] = {
+                            owner: statuses.find(status => status.type == 'component owner'),
+                            signee: statuses.find(status => status.type == 'requirement reviewer')
+                        };
+                    }
+                    return data;
+                });
+            this.loading = false
+            }
     },
     template: `{% verbatim %}
 <el-card v-loading="loading" >
     <el-row>
         <div style="display: inline-block">
             <label class="el-form-item__label" for="product">Product</label>
-            <el-select v-model="currentProduct" 
-            :loading="!products" name='product' 
-            placeholder="product" 
+            <el-select v-model="currentProduct"
+            :loading="!products" name='product'
+            placeholder="product"
             clearable>
                 <el-option v-for="product in products" 
                     :key="product.id" 
@@ -274,10 +279,10 @@ Vue.component('widget-components-list', {
 
         <div style="display: inline-block">
             <label class="el-form-item__label" for="location">Location</label>
-            <el-select v-model="currentLocation" 
-            :loading="!locations" 
-            name="location" 
-            placeholder="location" 
+            <el-select v-model="currentLocation"
+            :loading="!locations"
+            name="location"
+            placeholder="location"
             clearable>
                 <el-option v-for="location in locations" 
                     :key="location.id" 
@@ -289,11 +294,11 @@ Vue.component('widget-components-list', {
 
         <div style="display: inline-block">
             <label class="el-form-item__label" for="runtimes">Runtime type</label>
-            <el-select 
-            v-model="currentRuntime" 
-            :loading="!runtimes" 
-            name="Runtime Type" 
-            placeholder="runtime type" 
+            <el-select
+            v-model="currentRuntime"
+            :loading="!runtimes"
+            name="Runtime Type"
+            placeholder="runtime type"
             clearable>
                 <el-option v-for="runtime in runtimes"
                     :key="runtime.id"
@@ -411,13 +416,17 @@ Vue.component('widget-components-list', {
                 </template>
 
                 <template slot-scope="scope">
-                    
                     <div :class="getOwnerClass(scope.row[req.title].owner)"></div>
-                    <div class="inner-cell">
-                        <span class="word-wrap" v-if="scope.row[req.title].owner && scope.row[req.title].owner.notes && scope.row[req.title].owner.status.name !='n/a'">
-                        {{ scope.row[req.title].owner.notes }}
-                        </span>
-                    </div>
+                    <widget-status-popover
+                     :owner-status="scope.row[req.title].owner"
+                     :signee-status="scope.row[req.title].signee"
+                     v-if="displayPopover(scope.row[req.title].owner, scope.row[req.title].signee)">
+                        <div class="inner-cell">
+                            <span class="word-wrap" v-if="scope.row[req.title].owner && scope.row[req.title].owner.notes && scope.row[req.title].owner.status.name !='n/a'">
+                            {{ scope.row[req.title].owner.notes }}
+                            </span>
+                        </div>
+                </widget-status-popover>
                 </template>
             </el-table-column>
 

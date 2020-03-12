@@ -72,9 +72,15 @@ class ProductVersionSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(QueryFieldsMixin, serializers.ModelSerializer):
+    photo = serializers.SerializerMethodField()
+
     class Meta:
         model = get_user_model()
         exclude = ('password', )
+
+    def get_photo(self, obj: User):
+        return obj.photo_url
+
 
 class SoftwareVendorSerializer(serializers.ModelSerializer):
     class Meta:
