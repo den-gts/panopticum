@@ -230,7 +230,7 @@ Vue.component('widget-components-list', {
             this.loading = true
             await this.fetchStatusEntries();
             this.tableData = this.componentVersions.map(compVer => {
-                
+
                 let data = {
                     id: compVer.id, 
                     name: compVer.component.name, 
@@ -425,6 +425,7 @@ Vue.component('widget-components-list', {
                             <span class="word-wrap" v-if="scope.row[req.title].owner && scope.row[req.title].owner.notes && scope.row[req.title].owner.status.name !='n/a'">
                             {{ scope.row[req.title].owner.notes }}
                             </span>
+                            <div class="fill-cell" v-else></div>
                         </div>
                 </widget-status-popover>
                 </template>
