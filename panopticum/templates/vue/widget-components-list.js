@@ -154,7 +154,7 @@ Vue.component('widget-components-list', {
             loading = false
         },
         displayPopover(ownerStatus, signeeStatus) {
-            return [ownerStatus, signeeStatus].some(status => status) && (ownerStatus.status.id !=1 && signeeStatus.status !=1 );
+            return [ownerStatus, signeeStatus].some(status => status && status.status && status.status.id !=1);
         },
         handleDropdownCommand(command) {
             // handle change dropdown filters
