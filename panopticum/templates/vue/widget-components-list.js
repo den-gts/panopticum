@@ -153,6 +153,9 @@ Vue.component('widget-components-list', {
             }
             loading = false
         },
+        displayPopover(ownerStatus, signeeStatus) {
+            return [ownerStatus, signeeStatus].some(status => status && status.status && status.status.id !=1);
+        },
         handleDropdownCommand(command) {
             // handle change dropdown filters
             let headerFilters = {};
@@ -411,13 +414,18 @@ Vue.component('widget-components-list', {
                 </template>
 
                 <template slot-scope="scope">
-                    
                     <div :class="getOwnerClass(scope.row[req.title].owner)"></div>
-                    <div class="inner-cell">
-                        <span class="word-wrap" v-if="scope.row[req.title].owner && scope.row[req.title].owner.notes && scope.row[req.title].owner.status.name !='n/a'">
-                        {{ scope.row[req.title].owner.notes }}
-                        </span>
-                    </div>
+                    <widget-status-popover
+                     :owner-status="scope.row[req.title].owner"
+                     :signee-status="scope.row[req.title].signee"
+                     v-if="displayPopover(scope.row[req.title].owner, scope.row[req.title].signee)">
+                        <div class="inner-cell">
+                            <span class="word-wrap" v-if="scope.row[req.title].owner && scope.row[req.title].owner.notes && scope.row[req.title].owner.status.name !='n/a'">
+                            {{ scope.row[req.title].owner.notes }}
+                            </span>
+                            <div class="fill-cell" v-else></div>
+                        </div>
+                </widget-status-popover>
                 </template>
             </el-table-column>
 
